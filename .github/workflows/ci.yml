@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref-template:
+        description: 'Branch or tag ref to check out for template'
+        type: string
+        required: false
+      ref-zenml:
+        description: 'Branch or tag ref to check out for ZenML'
+        type: string
+        required: false
+  workflow_call:
+    inputs:
+      ref-template:
+        description: 'Branch or tag ref to check out for template'
+        type: string
+        required: false
+      ref-zenml:
+        description: 'Branch or tag ref to check out for ZenML'
+        type: string
+        required: false
+  push:
+    branches: ["main", "develop"]
+    paths-ignore: ["README.md"]
+  pull_request:
+    paths-ignore: ["README.md"]
+
+concurrency:
+  # New commit on branch cancels running workflows of the same branch
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  run-tests:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        stack-name: [local]
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+    env:
+      ZENML_DEBUG: true
+      ZENML_ANALYTICS_OPT_IN: false
+      ZENML_LOGGING_VERBOSITY: INFO
+      # fork fix for macos
+      OBJC_DISABLE_INITIALIZE_FORK_SAFETY: YES
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - name: Run tests
+        uses: ./.github/actions/llm_finetuning_template_test
+        with:
+          python-version: ${{ matrix.python-version }}
+          ref-zenml: ${{ inputs.ref-zenml || 'develop' }}
+          ref-template: ${{ inputs.ref-template || github.ref }}

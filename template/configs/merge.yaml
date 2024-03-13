@@ -1,0 +1,27 @@
+model:
+  name: {{ product_name }}-{{ model_repository.split("/") | last }}
+  description: "Fine-tune `{{ model_repository }}`."
+  tags:
+    - llm
+    - lora
+    - {{ model_repository }}
+
+steps:
+  merge:
+    parameters:
+      config:
+        base_model_repo: {{ model_repository }}
+        from_safetensors: {{ from_safetensors }}
+        {%- if huggingface_adapter_model_repository %}
+        adapter_repo: {{ huggingface_adapter_model_repository }}
+        {%- else %}
+        # REQUIRED: Huggingface repository in which to adapter is stored
+        adapter_repo: null
+        {%- endif %}
+        {%- if huggingface_merged_model_repository %}
+        output_repo: {{ huggingface_merged_model_repository }}
+        {%- else %}
+        # REQUIRED: Huggingface repository to which the merged model should be pushed
+        output_repo: null
+        {%- endif %}
+        precision: bf16-true
