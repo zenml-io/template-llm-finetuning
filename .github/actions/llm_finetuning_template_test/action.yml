@@ -48,7 +48,7 @@ runs:
     - name: Install wheel
       shell: bash
       run: |
-        uv pip install wheel
+        pip install wheel uv
     
     - name: Install ZenML
       if: ${{ inputs.ref-zenml != '' }}
