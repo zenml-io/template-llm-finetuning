@@ -67,6 +67,7 @@ runs:
       run: |
         pip install -r ./local_checkout/test-requirements.txt
         pip install -r ./local_checkout/template/requirements.txt
+        pip install "pyyaml-include<2.0"
 
     - name: Run pytests
       shell: bash
