@@ -57,7 +57,7 @@ model_repository:
     type: str
     help: |
         Huggingface repository of the model to finetune.
-    default: mistralai/Mistral-7B-v0.1
+    default: microsoft/phi-2
 steps_of_finetuning:
     type: int
     help: The number of steps of finetuning job.
@@ -86,6 +86,11 @@ step_operator:
     type: str
     help: The operator to be used for the finetuning and evaluation jobs.
     default: gcp_a100
+bf16:
+    type: bool
+    help: |
+        Whether to use bf16 for the finetuning job.
+    default: true
 
 from_safetensors:
     type: bool

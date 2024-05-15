@@ -13,6 +13,7 @@ settings:
   docker:
     parent_image: pytorch/pytorch:2.2.0-{{ cuda_version }}-cudnn8-runtime
     requirements: requirements.txt
+    python_package_installer: uv
 
 parameters:
   base_model_id: {{ model_repository }}
@@ -30,6 +31,7 @@ steps:
     parameters:
       max_steps: {{ steps_of_finetuning }}
       eval_steps: {{ steps_of_finetuning // 10 }}
+      bf16: {{ bf16 }}
 
   evaluate_finetuned:
     step_operator: {{ step_operator }}

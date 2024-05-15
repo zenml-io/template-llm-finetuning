@@ -23,6 +23,9 @@ def evaluate_model(
     system_prompt: str,
     datasets_dir: Path,
     ft_model_dir: Optional[Path],
+    use_fast: bool = True,
+    load_in_4bit: bool = False,
+    load_in_8bit: bool = False,
 ) -> None:
     """Evaluate the model with ROUGE metrics.
 
@@ -32,11 +35,18 @@ def evaluate_model(
         datasets_dir: The path to the datasets directory.
         ft_model_dir: The path to the finetuned model directory. If None, the
             base model will be used.
+        use_fast: Whether to use the fast tokenizer.
+        load_in_4bit: Whether to load the model in 4bit mode.
+        load_in_8bit: Whether to load the model in 8bit mode.
     """
     logger.info("Evaluating model...")
 
     logger.info("Loading dataset...")
-    tokenizer = load_tokenizer(base_model_id, is_eval=True)
+    tokenizer = load_tokenizer(
+        base_model_id, 
+        is_eval=True,
+        use_fast=use_fast,
+    )
     test_dataset = load_from_disk(datasets_dir / "test_raw")
     test_dataset = test_dataset[:50]
     ground_truths = test_dataset["meaning_representation"]
@@ -44,10 +54,19 @@ def evaluate_model(
 
     if ft_model_dir is None:
         logger.info("Generating using base model...")
-        model = load_base_model(base_model_id, is_training=False)
+        model = load_base_model(
+            base_model_id, 
+            is_training=False,
+            load_in_4bit=load_in_4bit,
+            load_in_8bit=load_in_8bit,
+        )
     else:
         logger.info("Generating using finetuned model...")
-        model = load_pretrained_model(ft_model_dir)
+        model = load_pretrained_model(
+            ft_model_dir,
+            load_in_4bit=load_in_4bit,
+            load_in_8bit=load_in_8bit,
+        )
 
     model.eval()
     with torch.no_grad():
