@@ -15,6 +15,7 @@ def prepare_data(
     base_model_id: str,
     system_prompt: str,
     dataset_name: str = "gem/viggo",
+    use_fast: bool = True,
 ) -> Annotated[Path, "datasets_dir"]:
     """Prepare the datasets for finetuning.
 
@@ -22,6 +23,7 @@ def prepare_data(
         base_model_id: The base model id to use.
         system_prompt: The system prompt to use.
         dataset_name: The name of the dataset to use.
+        use_fast: Whether to use the fast tokenizer.
 
     Returns:
         The path to the datasets directory.
@@ -33,7 +35,7 @@ def prepare_data(
         "base_model_id": base_model_id
     })
 
-    tokenizer = load_tokenizer(base_model_id, False)
+    tokenizer = load_tokenizer(base_model_id, False, use_fast)
     gen_and_tokenize = partial(
         generate_and_tokenize_prompt,
         tokenizer=tokenizer,
