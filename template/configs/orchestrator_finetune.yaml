@@ -19,6 +19,8 @@ parameters:
   base_model_id: {{ model_repository }}
   system_prompt: |
       {{ system_prompt.split("\n") | join("\n      ") }}
+  use_fast: False
+  load_in_4bit: True
 
 steps:
   prepare_data:
