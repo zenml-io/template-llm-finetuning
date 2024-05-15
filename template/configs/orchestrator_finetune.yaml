@@ -13,7 +13,6 @@ settings:
   docker:
     parent_image: pytorch/pytorch:2.2.0-{{ cuda_version }}-cudnn8-runtime
     requirements: requirements.txt
-    python_package_installer: uv
     environment:
       PJRT_DEVICE: CUDA
       USE_TORCH_XLA: "false"
