@@ -9,7 +9,6 @@ def {{PLACEHOLDER}}_full_finetune(
     use_fast: bool = True,
     load_in_8bit: bool = False,
     load_in_4bit: bool = False,
-    cpu_mode: bool = False,
 ):
     """Very simplified pipeline for unit testing only."""
     datasets_dir = prepare_data(

@@ -37,7 +37,6 @@ settings:
 parameters:
   base_model_id: microsoft/phi-2
   use_fast: False
-  cpu_mode: True
   system_prompt: |
       Given a target sentence construct the underlying meaning representation of the input sentence as a single function with attributes and attribute values.
       This function should describe the target string accurately and the function must be one of the following ['inform', 'request', 'give_opinion', 'confirm', 'verify_attribute', 'suggest', 'request_explanation', 'recommend', 'request_attribute'].

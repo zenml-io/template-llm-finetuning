@@ -17,7 +17,6 @@ def {{ product_name.replace("-","_") }}_full_finetune(
     use_fast: bool = True,
     load_in_8bit: bool = False,
     load_in_4bit: bool = False,
-    cpu_mode: bool = False,
 ):
     """Pipeline for finetuning an LLM with peft.
     
@@ -39,7 +38,6 @@ def {{ product_name.replace("-","_") }}_full_finetune(
         use_fast=use_fast,
         load_in_4bit=load_in_4bit,
         load_in_8bit=load_in_8bit,
-        cpu_mode=cpu_mode,
     )
     evaluate_model(
         base_model_id,
@@ -49,7 +47,6 @@ def {{ product_name.replace("-","_") }}_full_finetune(
         use_fast=use_fast,
         load_in_8bit=load_in_8bit,
         load_in_4bit=load_in_4bit,
-        cpu_mode=cpu_mode,
         id="evaluate_finetuned",
     )
     evaluate_model(
@@ -60,7 +57,6 @@ def {{ product_name.replace("-","_") }}_full_finetune(
         use_fast=use_fast,
         load_in_8bit=load_in_8bit,
         load_in_4bit=load_in_4bit,
-        cpu_mode=cpu_mode,
         id="evaluate_base",
     )
     promote(after=["evaluate_finetuned", "evaluate_base"])

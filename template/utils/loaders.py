@@ -14,7 +14,6 @@ def load_base_model(
     is_training: bool = True,
     load_in_8bit: bool = False,
     load_in_4bit: bool = False,
-    cpu_mode: bool = False,
 ) -> Any:
     """Load the base model.
 
@@ -25,7 +24,6 @@ def load_base_model(
             applied.
         load_in_8bit: Whether to load the model in 8-bit mode.
         load_in_4bit: Whether to load the model in 4-bit mode.
-        cpu_mode: Whether to load the model in CPU mode.
 
     Returns:
         The base model.
@@ -40,7 +38,7 @@ def load_base_model(
 
     model = AutoModelForCausalLM.from_pretrained(
         base_model_id,
-        quantization_config=None if cpu_mode else bnb_config,
+        quantization_config=bnb_config,
         device_map="auto",
     )
 
@@ -76,7 +74,6 @@ def load_pretrained_model(
     ft_model_dir: Path,
     load_in_4bit: bool = False,
     load_in_8bit: bool = False,
-    cpu_mode: bool = False,
 ) -> AutoModelForCausalLM:
     """Load the finetuned model saved in the output directory.
 
@@ -84,7 +81,6 @@ def load_pretrained_model(
         ft_model_dir: The path to the finetuned model directory.
         load_in_4bit: Whether to load the model in 4-bit mode.
         load_in_8bit: Whether to load the model in 8-bit mode.
-        cpu_mode: Whether to load the model in CPU mode.
 
     Returns:
         The finetuned model.
@@ -98,7 +94,7 @@ def load_pretrained_model(
     )
     model = AutoModelForCausalLM.from_pretrained(
         ft_model_dir,
-        quantization_config=None if cpu_mode else bnb_config,
+        quantization_config=bnb_config,
         device_map="auto",
     )
     return model
