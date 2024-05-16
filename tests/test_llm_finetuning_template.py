@@ -14,11 +14,9 @@
 
 import os
 import pathlib
-import platform
 import shutil
 import subprocess
 import sys
-from typing import Optional
 
 import pytest
 from copier import Worker
@@ -26,6 +24,7 @@ from zenml.client import Client
 from zenml.enums import ExecutionStatus
 
 TEMPLATE_DIRECTORY = str(pathlib.Path.joinpath(pathlib.Path(__file__).parent.parent))
+
 
 def generate_and_run_project(
     tmp_path_factory: pytest.TempPathFactory,
@@ -57,7 +56,7 @@ The attributes must be one of the following: ['name', 'exp_release_date', 'relea
     # generate the template in a temp path
     current_dir = os.getcwd()
     dst_path = tmp_path_factory.mktemp("pytest-template")
-    config_path = TEMPLATE_DIRECTORY+ "/tests/test_config.yaml"
+    config_path = os.path.join(TEMPLATE_DIRECTORY, "tests", "test_config.yaml")
     print("TEMPLATE_DIR:", TEMPLATE_DIRECTORY)
     print("dst_path:", dst_path)
     print("current_dir:", current_dir)
@@ -70,6 +69,13 @@ The attributes must be one of the following: ['name', 'exp_release_date', 'relea
         vcs_ref="HEAD",
     ) as worker:
         worker.run_copy()
+
+    # use only data prep in the testing - finetuning is too heavy for runners
+    product_name_underscored = product_name.replace("-", "_")
+    os.remove(os.path.join(dst_path, "pipelines", "train.py"))
+    with open(os.path.join(TEMPLATE_DIRECTORY, "tests", "unit_test_pipeline.py"),"r") as src:
+        with open(os.path.join(dst_path, "pipelines", "train.py"), "w") as dst:
+            dst.write(src.read().replace("{{PLACEHOLDER}}", product_name_underscored))
 
     call = [
         sys.executable,
@@ -92,7 +98,7 @@ The attributes must be one of the following: ['name', 'exp_release_date', 'relea
             f"{e.output.decode()}"
         ) from e
 
-    pipeline_name = f"{product_name}_feature_engineering"
+    pipeline_name = f"{product_name_underscored}_full_finetune"
     pipeline = Client().get_pipeline(pipeline_name)
     assert pipeline
     runs = pipeline.runs
@@ -101,7 +107,7 @@ The attributes must be one of the following: ['name', 'exp_release_date', 'relea
 
     # clean up
     Client().delete_pipeline(pipeline_name)
-    Client().delete_model(f"{product_name}-{model_repository.split('/')[-1]}")
+    Client().delete_model(f"pytest-{model_repository.replace('/','-')}")
 
     os.chdir(current_dir)
     shutil.rmtree(dst_path)

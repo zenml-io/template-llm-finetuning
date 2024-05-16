@@ -4,7 +4,7 @@ import os
 from typing import Optional
 
 import click
-from pipelines.train import llm_peft_full_finetune
+from pipelines.train import {{ product_name.replace("-","_") }}_full_finetune
 
 
 @click.command(
@@ -58,7 +58,7 @@ def main(
     else:
         pipeline_args["config_path"] = config
 
-    llm_peft_full_finetune.with_options(**pipeline_args)()
+    {{ product_name.replace("-","_") }}_full_finetune.with_options(**pipeline_args)()
 
 
 if __name__ == "__main__":

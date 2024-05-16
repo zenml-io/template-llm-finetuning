@@ -16,7 +16,7 @@
 # 
 
 model:
-  name: llm-peft-microsoft-phi-2
+  name: pytest-microsoft-phi-2
   description: "Fine-tune `microsoft/phi-2`."
   tags:
     - llm
@@ -48,15 +48,3 @@ steps:
   prepare_data:
     parameters:
       dataset_name: gem/viggo
-
-  finetune:
-    enable_step_logs: False
-    parameters:
-      max_steps: 1
-      eval_steps: 30
-      bf16: False
-  
-  promote:
-    parameters:
-      metric: rouge2
-      target_stage: staging

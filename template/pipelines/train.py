@@ -11,7 +11,7 @@ zenml_logging.STEP_LOGS_STORAGE_MAX_MESSAGES = (
 
 
 @pipeline
-def llm_peft_full_finetune(
+def {{ product_name.replace("-","_") }}_full_finetune(
     system_prompt:str, 
     base_model_id:str,
     use_fast: bool = True,
