@@ -115,5 +115,5 @@ def test_custom_product_name(
 
     generate_and_run_project(
         tmp_path_factory=tmp_path_factory,
-        product_name="custom_product_name",
+        product_name="custom-product-name",
     )
