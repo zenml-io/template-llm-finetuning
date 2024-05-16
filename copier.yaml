@@ -50,7 +50,7 @@ product_name:
     help: The technical name of the data product you are building
     default: llm-peft
     validator: >-
-        {% if not (product_name | regex_search('^[a-z][a-z0-9\-]*$')) %}
+        {% if not (product_name | regex_search('^[a-z][-a-z0-9]*$')) %}
         The product name can only contain alphanumeric characters and dashes and must start with a character.
         {% endif %}
 model_repository:
@@ -91,23 +91,6 @@ bf16:
     help: |
         Whether to use bf16 for the finetuning job.
     default: true
-
-from_safetensors:
-    type: bool
-    help: |
-        Whether the Huggingface model repository stores the model weights as safetensors. Check out the Lit-GPT docs
-        to find the answer for your current selected model {{ model_repository }}:
-        https://github.com/Lightning-AI/litgpt?tab=readme-ov-file#-lit-gpt-1
-    default: false
-
-huggingface_merged_model_repository:
-    type: str
-    help: The huggingface repository to which the finetuned model should be pushed [Optional]
-    default: ""
-huggingface_adapter_model_repository:
-    type: str
-    help: The huggingface repository to which the finetuned adapter should be pushed [Optional]
-    default: ""
 zenml_server_url:
     type: str
     help: The URL of the ZenML server [Optional]
@@ -155,10 +138,7 @@ _tasks:
       {%- if zenml_server_url %}
       echo "    zenml connect --url {{ zenml_server_url }}"
       {%- endif %}
-      {%- if (huggingface_merged_model_repository or huggingface_adapter_model_repository) %}
-      echo "    zenml secret create huggingface_credentials --token=<HF_TOKEN>"
-      {%- endif %}
-      echo "    python run.py --finetuning-pipeline --config finetune-alpaca.yaml"
+      echo "    python run.py --config orchestrator_finetune.yaml"
       echo "Next, you should take a look at the '{{ _copier_conf.dst_path }}/README.md' file in the generated project."
       echo "Happy coding!"
 
