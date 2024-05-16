@@ -17,6 +17,7 @@ def llm_peft_full_finetune(
     use_fast: bool = True,
     load_in_8bit: bool = False,
     load_in_4bit: bool = False,
+    cpu_mode: bool = False,
 ):
     """Pipeline for finetuning an LLM with peft.
     
@@ -26,16 +27,7 @@ def llm_peft_full_finetune(
     - finetune: finetune the model
     - evaluate_model: evaluate the base and finetuned model
     - promote: promote the model to the target stage, if evaluation was successful
-    """
-    if not load_in_8bit and not load_in_4bit:
-        raise ValueError(
-            "At least one of `load_in_8bit` and `load_in_4bit` must be True."
-        )
-    if load_in_4bit and load_in_8bit:
-        raise ValueError(
-            "Only one of `load_in_8bit` and `load_in_4bit` can be True."
-        )
-    
+    """ 
     datasets_dir = prepare_data(
         base_model_id=base_model_id, 
         system_prompt=system_prompt,
@@ -47,6 +39,7 @@ def llm_peft_full_finetune(
         use_fast=use_fast,
         load_in_4bit=load_in_4bit,
         load_in_8bit=load_in_8bit,
+        cpu_mode=cpu_mode,
     )
     evaluate_model(
         base_model_id,
@@ -56,6 +49,7 @@ def llm_peft_full_finetune(
         use_fast=use_fast,
         load_in_8bit=load_in_8bit,
         load_in_4bit=load_in_4bit,
+        cpu_mode=cpu_mode,
         id="evaluate_finetuned",
     )
     evaluate_model(
@@ -66,6 +60,7 @@ def llm_peft_full_finetune(
         use_fast=use_fast,
         load_in_8bit=load_in_8bit,
         load_in_4bit=load_in_4bit,
+        cpu_mode=cpu_mode,
         id="evaluate_base",
     )
     promote(after=["evaluate_finetuned", "evaluate_base"])

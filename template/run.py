@@ -53,7 +53,10 @@ def main(
     if not config:
         raise RuntimeError("Config file is required to run a pipeline.")
 
-    pipeline_args["config_path"] = os.path.join(config_folder, config)
+    if config in os.listdir(config_folder):
+        pipeline_args["config_path"] = os.path.join(config_folder, config)
+    else:
+        pipeline_args["config_path"] = config
 
     llm_peft_full_finetune.with_options(**pipeline_args)()
 

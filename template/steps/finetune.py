@@ -37,6 +37,7 @@ def finetune(
     use_fast: bool = True,
     load_in_4bit: bool = False,
     load_in_8bit: bool = False,
+    cpu_mode: bool = False,
 ) -> Annotated[Path, "ft_model_dir"]:
     """Finetune the model using PEFT.
 
@@ -80,6 +81,7 @@ def finetune(
         base_model_id,
         load_in_4bit=load_in_4bit,
         load_in_8bit=load_in_8bit,
+        cpu_mode=cpu_mode,
     )
 
     trainer = transformers.Trainer(

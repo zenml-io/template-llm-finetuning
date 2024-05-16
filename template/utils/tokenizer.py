@@ -2,7 +2,7 @@
 
 
 from transformers import AutoTokenizer
-
+import torch
 
 def load_tokenizer(
     base_model_id: str,
@@ -119,5 +119,5 @@ def tokenize_for_eval(
         for data_point in data_points["target"]
     ]
     return tokenizer(eval_prompts, padding="longest", return_tensors="pt").to(
-        "cuda"
+        "cuda" if torch.cuda.is_available() else "cpu"
     )

@@ -26,6 +26,7 @@ def evaluate_model(
     use_fast: bool = True,
     load_in_4bit: bool = False,
     load_in_8bit: bool = False,
+    cpu_mode: bool = False,
 ) -> None:
     """Evaluate the model with ROUGE metrics.
 
@@ -38,6 +39,7 @@ def evaluate_model(
         use_fast: Whether to use the fast tokenizer.
         load_in_4bit: Whether to load the model in 4bit mode.
         load_in_8bit: Whether to load the model in 8bit mode.
+        cpu_mode: Whether to use CPU mode.
     """
     logger.info("Evaluating model...")
 
@@ -59,6 +61,7 @@ def evaluate_model(
             is_training=False,
             load_in_4bit=load_in_4bit,
             load_in_8bit=load_in_8bit,
+            cpu_mode=cpu_mode,
         )
     else:
         logger.info("Generating using finetuned model...")
@@ -66,6 +69,7 @@ def evaluate_model(
             ft_model_dir,
             load_in_4bit=load_in_4bit,
             load_in_8bit=load_in_8bit,
+            cpu_mode=cpu_mode,
         )
 
     model.eval()

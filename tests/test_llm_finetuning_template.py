@@ -27,7 +27,6 @@ from zenml.enums import ExecutionStatus
 
 TEMPLATE_DIRECTORY = str(pathlib.Path.joinpath(pathlib.Path(__file__).parent.parent))
 
-
 def generate_and_run_project(
     tmp_path_factory: pytest.TempPathFactory,
     product_name: str = "llm-peft-pytest",
@@ -43,7 +42,7 @@ def generate_and_run_project(
         "full_name": "Pytest",
         "product_name": product_name,
         "model_repository": model_repository,
-        "steps_of_finetuning": 10,
+        "steps_of_finetuning": 1,
         "cuda_version": "cuda11.8",
         "system_prompt": """
 Given a target sentence construct the underlying meaning representation of the input sentence as a single function with attributes and attribute values.
@@ -58,6 +57,7 @@ The attributes must be one of the following: ['name', 'exp_release_date', 'relea
     # generate the template in a temp path
     current_dir = os.getcwd()
     dst_path = tmp_path_factory.mktemp("pytest-template")
+    config_path = TEMPLATE_DIRECTORY+ "/tests/test_config.yaml"
     print("TEMPLATE_DIR:", TEMPLATE_DIRECTORY)
     print("dst_path:", dst_path)
     print("current_dir:", current_dir)
@@ -75,7 +75,7 @@ The attributes must be one of the following: ['name', 'exp_release_date', 'relea
         sys.executable,
         "run.py",
         "--config",
-        "orchestrator_finetune.yaml",
+        config_path,
         "--no-cache",
     ]
 
