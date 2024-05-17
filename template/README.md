@@ -17,7 +17,7 @@ Using these pipelines, we can run the data-preparation and model finetuning with
 
 ## 🌎 Inspiration and Credit
 
-This project heavily relies on the [PEFT project](https://huggingface.co/docs/peft/en/index) by the amazing people at Huggingface and the [`{{ model_repository }}`](https://huggingface.co/{{ model_repository }}) model from the amazing people at {{ model_repository.split("/") | first }}.
+This project heavily relies on the [PEFT project](https://huggingface.co/docs/peft/en/index) by the amazing people at Hugging Face and the [`{{ model_repository }}`](https://huggingface.co/{{ model_repository }}) model from the amazing people at {{ model_repository.split("/") | first }}.
 
 ## 🏃 How to run
 
