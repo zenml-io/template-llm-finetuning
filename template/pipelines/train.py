@@ -2,12 +2,7 @@
 
 
 from steps import evaluate_model, finetune, prepare_data, promote
-from zenml import logging as zenml_logging
 from zenml import pipeline
-
-zenml_logging.STEP_LOGS_STORAGE_MAX_MESSAGES = (
-    10000  # workaround for https://github.com/zenml-io/zenml/issues/2252
-)
 
 
 @pipeline
