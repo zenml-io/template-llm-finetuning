@@ -14,11 +14,9 @@
 
 import os
 import pathlib
-import platform
 import shutil
 import subprocess
 import sys
-from typing import Optional
 
 import pytest
 from copier import Worker
@@ -30,8 +28,8 @@ TEMPLATE_DIRECTORY = str(pathlib.Path.joinpath(pathlib.Path(__file__).parent.par
 
 def generate_and_run_project(
     tmp_path_factory: pytest.TempPathFactory,
-    product_name: str = "llm_finetuning_pipeline_pytest",
-    model_repository: str = "mistralai/Mistral-7B-Instruct-v0.1",
+    product_name: str = "llm-peft-pytest",
+    model_repository: str = "microsoft/phi-2",
 ):
     """Generate and run the starter project with different options."""
 
@@ -43,16 +41,22 @@ def generate_and_run_project(
         "full_name": "Pytest",
         "product_name": product_name,
         "model_repository": model_repository,
-        "from_safetensors": False,
+        "steps_of_finetuning": 1,
         "cuda_version": "cuda11.8",
-        "huggingface_merged_model_repository": "",
-        "huggingface_adapter_model_repository": "",
+        "system_prompt": """
+Given a target sentence construct the underlying meaning representation of the input sentence as a single function with attributes and attribute values.
+This function should describe the target string accurately and the function must be one of the following ['inform', 'request', 'give_opinion', 'confirm', 'verify_attribute', 'suggest', 'request_explanation', 'recommend', 'request_attribute'].
+The attributes must be one of the following: ['name', 'exp_release_date', 'release_year', 'developer', 'esrb', 'rating', 'genres', 'player_perspective', 'has_multiplayer', 'platforms', 'available_on_steam', 'has_linux_release', 'has_mac_release', 'specifier']""",
+        "dataset_name": "gem/viggo",
+        "step_operator": "gcp_a100",
+        "bf16": False,
         "zenml_server_url": "",
     }
 
     # generate the template in a temp path
     current_dir = os.getcwd()
     dst_path = tmp_path_factory.mktemp("pytest-template")
+    config_path = os.path.join(TEMPLATE_DIRECTORY, "tests", "test_config.yaml")
     print("TEMPLATE_DIR:", TEMPLATE_DIRECTORY)
     print("dst_path:", dst_path)
     print("current_dir:", current_dir)
@@ -66,12 +70,18 @@ def generate_and_run_project(
     ) as worker:
         worker.run_copy()
 
+    # use only data prep in the testing - finetuning is too heavy for runners
+    product_name_underscored = product_name.replace("-", "_")
+    os.remove(os.path.join(dst_path, "pipelines", "train.py"))
+    with open(os.path.join(TEMPLATE_DIRECTORY, "tests", "unit_test_pipeline.py"),"r") as src:
+        with open(os.path.join(dst_path, "pipelines", "train.py"), "w") as dst:
+            dst.write(src.read().replace("{{PLACEHOLDER}}", product_name_underscored))
+
     call = [
         sys.executable,
         "run.py",
-        "--feature-pipeline",
         "--config",
-        "feature-alpaca.yaml",
+        config_path,
         "--no-cache",
     ]
 
@@ -88,7 +98,7 @@ def generate_and_run_project(
             f"{e.output.decode()}"
         ) from e
 
-    pipeline_name = f"{product_name}_feature_engineering"
+    pipeline_name = f"{product_name_underscored}_full_finetune"
     pipeline = Client().get_pipeline(pipeline_name)
     assert pipeline
     runs = pipeline.runs
@@ -97,7 +107,7 @@ def generate_and_run_project(
 
     # clean up
     Client().delete_pipeline(pipeline_name)
-    Client().delete_model(f"{product_name}-{model_repository.split('/')[-1]}")
+    Client().delete_model(f"pytest-{model_repository.replace('/','-')}")
 
     os.chdir(current_dir)
     shutil.rmtree(dst_path)
@@ -111,5 +121,5 @@ def test_custom_product_name(
 
     generate_and_run_project(
         tmp_path_factory=tmp_path_factory,
-        product_name="custom_product_name",
+        product_name="custom-product-name",
     )

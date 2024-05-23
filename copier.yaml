@@ -48,24 +48,20 @@ email:
 product_name:
     type: str
     help: The technical name of the data product you are building
-    default: llm_lora
+    default: llm-peft
     validator: >-
-        {% if not (product_name | regex_search('^[a-z][a-z0-9\_]*$')) %}
-        The product name can only contain alphanumeric characters and underscores and must start with a character.
+        {% if not (product_name | regex_search('^[a-z][-a-z0-9]*$')) %}
+        The product name can only contain alphanumeric characters and dashes and must start with a character.
         {% endif %}
 model_repository:
     type: str
     help: |
-        Huggingface repository of the model to finetune. Check out the Lit-GPT docs for the currently available models
-        here https://github.com/Lightning-AI/litgpt?tab=readme-ov-file#-lit-gpt-1
-    default: mistralai/Mistral-7B-Instruct-v0.1
-from_safetensors:
-    type: bool
-    help: |
-        Whether the Huggingface model repository stores the model weights as safetensors. Check out the Lit-GPT docs
-        to find the answer for your current selected model {{ model_repository }}:
-        https://github.com/Lightning-AI/litgpt?tab=readme-ov-file#-lit-gpt-1
-    default: false
+        Huggingface repository of the model to finetune.
+    default: microsoft/phi-2
+steps_of_finetuning:
+    type: int
+    help: The number of steps of finetuning job.
+    default: 300
 cuda_version:
     type: str
     help: The available cuda version. (Only relevant when using a remote orchestrator)
@@ -73,14 +69,28 @@ cuda_version:
         CUDA 11.8: cuda11.8
         CUDA 12.1: cuda12.1
     default: cuda11.8
-huggingface_merged_model_repository:
+system_prompt:
     type: str
-    help: The huggingface repository to which the finetuned model should be pushed [Optional]
-    default: ""
-huggingface_adapter_model_repository:
+    help: |
+        The system prompt to be used for the finetuning job.
+    default: |
+        Given a target sentence construct the underlying meaning representation of the input sentence as a single function with attributes and attribute values.
+        This function should describe the target string accurately and the function must be one of the following ['inform', 'request', 'give_opinion', 'confirm', 'verify_attribute', 'suggest', 'request_explanation', 'recommend', 'request_attribute'].
+        The attributes must be one of the following: ['name', 'exp_release_date', 'release_year', 'developer', 'esrb', 'rating', 'genres', 'player_perspective', 'has_multiplayer', 'platforms', 'available_on_steam', 'has_linux_release', 'has_mac_release', 'specifier']
+dataset_name:
     type: str
-    help: The huggingface repository to which the finetuned adapter should be pushed [Optional]
-    default: ""
+    help: |
+        The dataset to be used for the finetuning job.
+    default: gem/viggo
+step_operator:
+    type: str
+    help: The operator to be used for the finetuning and evaluation jobs.
+    default: gcp_a100
+bf16:
+    type: bool
+    help: |
+        Whether to use bf16 for the finetuning job.
+    default: true
 zenml_server_url:
     type: str
     help: The URL of the ZenML server [Optional]
@@ -128,10 +138,7 @@ _tasks:
       {%- if zenml_server_url %}
       echo "    zenml connect --url {{ zenml_server_url }}"
       {%- endif %}
-      {%- if (huggingface_merged_model_repository or huggingface_adapter_model_repository) %}
-      echo "    zenml secret create huggingface_credentials --token=<HF_TOKEN>"
-      {%- endif %}
-      echo "    python run.py --finetuning-pipeline --config finetune-alpaca.yaml"
+      echo "    python run.py --config orchestrator_finetune.yaml"
       echo "Next, you should take a look at the '{{ _copier_conf.dst_path }}/README.md' file in the generated project."
       echo "Happy coding!"
 

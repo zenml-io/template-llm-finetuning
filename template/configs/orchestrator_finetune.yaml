@@ -1,0 +1,44 @@
+# {% include 'template/license_header' %}
+
+model:
+  name: {{ product_name }}-{{ model_repository.replace("/","-") }}
+  description: "Fine-tune `{{ model_repository }}`."
+  tags:
+    - llm
+    - peft
+    - {{ model_repository }}
+  version: {{ steps_of_finetuning }}_steps
+
+settings:
+  docker:
+    parent_image: pytorch/pytorch:2.2.2-{{ cuda_version }}-cudnn8-runtime
+    requirements: requirements.txt
+    python_package_installer: uv
+    environment:
+      PJRT_DEVICE: CUDA
+      USE_TORCH_XLA: "false"
+      MKL_SERVICE_FORCE_INTEL: "1"
+
+parameters:
+  base_model_id: {{ model_repository }}
+  use_fast: False
+  load_in_4bit: True
+  system_prompt: |
+      {{ system_prompt.split("\n") | join("\n      ") }}
+
+steps:
+  prepare_data:
+    parameters:
+      dataset_name: {{ dataset_name }}
+
+  finetune:
+    enable_step_logs: False
+    parameters:
+      max_steps: {{ steps_of_finetuning }}
+      eval_steps: {{ steps_of_finetuning // 10 }}
+      bf16: {{ bf16 }}
+
+  promote:
+    parameters:
+      metric: rouge2
+      target_stage: staging
