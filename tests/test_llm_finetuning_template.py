@@ -96,6 +96,7 @@ The attributes must be one of the following: ['name', 'exp_release_date', 'relea
         )
         for line in iter(process.stdout.readline, b""):
             print(line.decode(),end="")
+        process.wait()
     except subprocess.CalledProcessError as e:
         raise RuntimeError(
             f"Failed to run project generated with parameters: {answers}\n"
