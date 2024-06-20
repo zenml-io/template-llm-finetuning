@@ -87,12 +87,15 @@ The attributes must be one of the following: ['name', 'exp_release_date', 'relea
     ]
 
     try:
-        subprocess.check_output(
+        process = subprocess.Popen(
             call,
             cwd=str(dst_path),
             env=os.environ.copy(),
+            stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
         )
+        for line in iter(process.stdout.readline, b""):
+            print(line.decode(),end="")
     except subprocess.CalledProcessError as e:
         raise RuntimeError(
             f"Failed to run project generated with parameters: {answers}\n"
