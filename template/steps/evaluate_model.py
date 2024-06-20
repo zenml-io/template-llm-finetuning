@@ -11,8 +11,9 @@ from utils.loaders import (
     load_pretrained_model,
 )
 from utils.tokenizer import tokenize_for_eval, load_tokenizer
-from zenml import log_model_metadata, save_artifact, step
+from zenml import save_artifact, step
 from zenml.logger import get_logger
+from zenml.utils.cuda_utils import cleanup_gpu_memory
 
 logger = get_logger(__name__)
 
@@ -39,15 +40,16 @@ def evaluate_model(
         load_in_4bit: Whether to load the model in 4bit mode.
         load_in_8bit: Whether to load the model in 8bit mode.
     """
+    cleanup_gpu_memory(force=True)
     logger.info("Evaluating model...")
 
     logger.info("Loading dataset...")
     tokenizer = load_tokenizer(
-        base_model_id, 
+        base_model_id,
         is_eval=True,
         use_fast=use_fast,
     )
-    test_dataset = load_from_disk(datasets_dir / "test_raw")
+    test_dataset = load_from_disk(str((datasets_dir / "test_raw").absolute()))
     test_dataset = test_dataset[:50]
     ground_truths = test_dataset["meaning_representation"]
     tokenized_train_dataset = tokenize_for_eval(test_dataset, tokenizer, system_prompt)
@@ -55,7 +57,7 @@ def evaluate_model(
     if ft_model_dir is None:
         logger.info("Generating using base model...")
         model = load_base_model(
-            base_model_id, 
+            base_model_id,
             is_training=False,
             load_in_4bit=load_in_4bit,
             load_in_8bit=load_in_8bit,
@@ -85,9 +87,7 @@ def evaluate_model(
     prefix = "base_model_" if ft_model_dir is None else "finetuned_model_"
     rouge = evaluate.load("rouge")
     rouge_metrics = rouge.compute(predictions=predictions, references=ground_truths)
-    metadata = {prefix + k: float(v) for k, v in rouge_metrics.items()}
-
-    log_model_metadata(metadata)
-    logger.info("Computed metrics: " + str(metadata))
+    
+    logger.info("Computed metrics: " + str(rouge_metrics))
 
     save_artifact(rouge_metrics, prefix + "rouge_metrics")

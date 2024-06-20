@@ -14,6 +14,10 @@ settings:
     parent_image: pytorch/pytorch:2.2.2-{{ cuda_version }}-cudnn8-runtime
     requirements: requirements.txt
     python_package_installer: uv
+    python_package_installer_args:
+      system: null
+    apt_packages: 
+      - git
     environment:
       PJRT_DEVICE: CUDA
       USE_TORCH_XLA: "false"
@@ -21,7 +25,7 @@ settings:
 
 parameters:
   base_model_id: {{ model_repository }}
-  use_fast: False
+  use_fast: {{ use_fast_tokenizer }}
   load_in_4bit: True
   system_prompt: |
       {{ system_prompt.split("\n") | join("\n      ") }}
@@ -32,7 +36,10 @@ steps:
       dataset_name: {{ dataset_name }}
 
   finetune:
-    enable_step_logs: False
+    retry:
+      max_retries: 3
+      delay: 10
+      backoff: 2
     step_operator: {{ step_operator }}
     parameters:
       max_steps: {{ steps_of_finetuning }}
@@ -40,9 +47,17 @@ steps:
       bf16: {{ bf16 }}
 
   evaluate_finetuned:
+    retry:
+      max_retries: 3
+      delay: 10
+      backoff: 2
     step_operator: {{ step_operator }}
 
   evaluate_base:
+    retry:
+      max_retries: 3
+      delay: 10
+      backoff: 2
     step_operator: {{ step_operator }}
 
   promote:

@@ -78,7 +78,7 @@ runs:
     - name: Run pytests
       shell: bash
       run: |
-        pytest ./local_checkout/tests
+        pytest -s ./local_checkout/tests
 
     - name: Clean-up
       shell: bash

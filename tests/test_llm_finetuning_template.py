@@ -51,6 +51,7 @@ The attributes must be one of the following: ['name', 'exp_release_date', 'relea
         "step_operator": "gcp_a100",
         "bf16": False,
         "zenml_server_url": "",
+        "use_fast_tokenizer": False,
     }
 
     # generate the template in a temp path
@@ -86,12 +87,16 @@ The attributes must be one of the following: ['name', 'exp_release_date', 'relea
     ]
 
     try:
-        subprocess.check_output(
+        process = subprocess.Popen(
             call,
             cwd=str(dst_path),
             env=os.environ.copy(),
+            stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
         )
+        for line in iter(process.stdout.readline, b""):
+            print(line.decode(),end="")
+        process.wait()
     except subprocess.CalledProcessError as e:
         raise RuntimeError(
             f"Failed to run project generated with parameters: {answers}\n"
