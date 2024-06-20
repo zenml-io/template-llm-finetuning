@@ -13,7 +13,7 @@
 #  permissions and limitations under the License.
 
 
-import os
+import os, sys
 import shutil
 from typing import Generator
 
@@ -75,4 +75,10 @@ def clean_zenml_client(
 
     # remove all traces, and change working directory back to base path
     os.chdir(orig_cwd)
-    shutil.rmtree(str(tmp_path))
+    if sys.platform == "win32":
+        try:
+            shutil.rmtree(str(tmp_path))
+        except:
+            pass
+    else:
+        shutil.rmtree(str(tmp_path))
