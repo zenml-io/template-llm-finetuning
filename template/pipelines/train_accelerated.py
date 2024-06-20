@@ -1,27 +1,33 @@
 # {% include 'template/license_header' %}
 
-
-from steps import evaluate_model, finetune, prepare_data, promote, log_metadata_from_step_artifact
+from steps import (
+    evaluate_model,
+    finetune,
+    prepare_data,
+    promote,
+    log_metadata_from_step_artifact,
+)
 from zenml import pipeline
+from zenml.integrations.huggingface.steps import run_with_accelerate
 
 
 @pipeline
 def {{ product_name.replace("-","_") }}_full_finetune(
-    system_prompt:str, 
-    base_model_id:str,
+    system_prompt: str,
+    base_model_id: str,
     use_fast: bool = True,
     load_in_8bit: bool = False,
     load_in_4bit: bool = False,
 ):
-    """Pipeline for finetuning an LLM with PEFT.
-    
+    """Pipeline for finetuning an LLM with PEFT powered by Accelerate.
+
     It will run the following steps:
 
     - prepare_data: prepare the datasets and tokenize them
     - finetune: finetune the model
     - evaluate_model: evaluate the base and finetuned model
     - promote: promote the model to the target stage, if evaluation was successful
-    """ 
+    """
     if not load_in_8bit and not load_in_4bit:
         raise ValueError(
             "At least one of `load_in_8bit` and `load_in_4bit` must be True."
@@ -52,9 +58,9 @@ def {{ product_name.replace("-","_") }}_full_finetune(
         id="log_metadata_evaluation_base"
     )
 
-    ft_model_dir = finetune(
-        base_model_id,
-        datasets_dir,
+    ft_model_dir = run_with_accelerate(finetune)(
+        base_model_id=base_model_id,
+        dataset_dir=datasets_dir,
         use_fast=use_fast,
         load_in_8bit=load_in_8bit,
         load_in_4bit=load_in_4bit,

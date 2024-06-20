@@ -6,8 +6,9 @@ from pathlib import Path
 from materializers.directory_materializer import DirectoryMaterializer
 from typing_extensions import Annotated
 from utils.tokenizer import generate_and_tokenize_prompt, load_tokenizer
-from zenml import step, log_model_metadata
+from zenml import log_model_metadata, step
 from zenml.materializers import BuiltInMaterializer
+from zenml.utils.cuda_utils import cleanup_gpu_memory
 
 
 @step(output_materializers=[DirectoryMaterializer, BuiltInMaterializer])
@@ -30,10 +31,14 @@ def prepare_data(
     """
     from datasets import load_dataset
 
-    log_model_metadata({
-        "system_prompt": system_prompt,
-        "base_model_id": base_model_id
-    })
+    cleanup_gpu_memory(force=True)
+
+    log_model_metadata(
+        {
+            "system_prompt": system_prompt,
+            "base_model_id": base_model_id,
+        }
+    )
 
     tokenizer = load_tokenizer(base_model_id, False, use_fast)
     gen_and_tokenize = partial(
@@ -42,11 +47,23 @@ def prepare_data(
         system_prompt=system_prompt,
     )
 
-    train_dataset = load_dataset(dataset_name, split="train")
+    train_dataset = load_dataset(
+        dataset_name,
+        split="train",
+        trust_remote_code=True,
+    )
     tokenized_train_dataset = train_dataset.map(gen_and_tokenize)
-    eval_dataset = load_dataset(dataset_name, split="validation")
+    eval_dataset = load_dataset(
+        dataset_name,
+        split="validation",
+        trust_remote_code=True,
+    )
     tokenized_val_dataset = eval_dataset.map(gen_and_tokenize)
-    test_dataset = load_dataset(dataset_name, split="test")
+    test_dataset = load_dataset(
+        dataset_name,
+        split="test",
+        trust_remote_code=True,
+    )
 
     datasets_path = Path("datasets")
     tokenized_train_dataset.save_to_disk(str((datasets_path / "train").absolute()))

@@ -1,8 +1,7 @@
 # {% include 'template/license_header' %}
 
-
 from transformers import AutoTokenizer
-import torch
+
 
 def load_tokenizer(
     base_model_id: str,
@@ -21,8 +20,8 @@ def load_tokenizer(
     """
     if is_eval:
         tokenizer = AutoTokenizer.from_pretrained(
-            base_model_id, 
-            add_bos_token=True, 
+            base_model_id,
+            add_bos_token=True,
             device_map="auto",
             use_fast=use_fast,
         )
@@ -119,5 +118,5 @@ def tokenize_for_eval(
         for data_point in data_points["target"]
     ]
     return tokenizer(eval_prompts, padding="longest", return_tensors="pt").to(
-        "cuda" if torch.cuda.is_available() else "cpu"
+        "cuda"
     )

@@ -62,6 +62,10 @@ steps_of_finetuning:
     type: int
     help: The number of steps of finetuning job.
     default: 300
+use_fast_tokenizer:
+    type: bool
+    help: Wether to use the fast tokenization or not, make sure your base model supports that
+    default: false
 cuda_version:
     type: str
     help: The available cuda version. (Only relevant when using a remote orchestrator)
