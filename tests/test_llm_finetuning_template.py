@@ -51,6 +51,7 @@ The attributes must be one of the following: ['name', 'exp_release_date', 'relea
         "step_operator": "gcp_a100",
         "bf16": False,
         "zenml_server_url": "",
+        "use_fast_tokenizer": False,
     }
 
     # generate the template in a temp path
