@@ -140,7 +140,7 @@ _tasks:
       echo "    cd {{ _copier_conf.dst_path }}"
       echo "    pip install -r requirements.txt"
       {%- if zenml_server_url %}
-      echo "    zenml connect --url {{ zenml_server_url }}"
+      echo "    zenml login {{ zenml_server_url }}"
       {%- endif %}
       echo "    python run.py --config orchestrator_finetune.yaml"
       echo "Next, you should take a look at the '{{ _copier_conf.dst_path }}/README.md' file in the generated project."
