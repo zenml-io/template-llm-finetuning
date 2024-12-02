@@ -55,5 +55,5 @@ jobs:
         uses: ./.github/actions/llm_finetuning_template_test
         with:
           python-version: ${{ matrix.python-version }}
-          ref-zenml: ${{ inputs.ref-zenml || 'develop' }}
+          ref-zenml: ${{ inputs.ref-zenml || 'feature/followup-run-metadata' }}
           ref-template: ${{ inputs.ref-template || github.ref }}
